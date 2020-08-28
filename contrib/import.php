@@ -194,10 +194,8 @@ function create_record($zone_id, $zone, $host, $type, $destination, $db_conn) {
 		mysql_real_escape_string($destination));
 
 	$res = mysql_query($query, $db_conn);
-	if($res === false) {
-		return false;
-	}
-	return true;
+
+    return !($res === false);
 }
 
 function fix_destination($zone, $type, $destination) {
@@ -261,7 +259,7 @@ function bind_time_format($value) {
 				$multiplier = 604800;
         			break;
 		}
-		$value = $value*$multiplier;
+		$value *= $multiplier;
 	}
 	return $value;
 }
@@ -272,11 +270,13 @@ function strip_comments($string) {
 }
 
 $db_conn = mysql_connect(DB_SERVER, DB_USER, DB_PASSWORD);
-if( $db_conn === false )
-	die("impossible to connect to DB!");
+if( $db_conn === false ) {
+    die("impossible to connect to DB!");
+}
 
-if( mysql_select_db(DB_NAME) === false )
-	die("impossible to select DB!");
+if( mysql_select_db(DB_NAME) === false ) {
+    die("impossible to select DB!");
+}
 
 if(EMPTY_DB === true) {
 	mysql_query('DELETE FROM zones');

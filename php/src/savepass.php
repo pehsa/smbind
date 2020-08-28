@@ -51,4 +51,4 @@ if(!function_exists("is_admin")) { include("include.php"); }
 		$smarty->display("main.tpl");
 		die();
 	}
-?>
+
