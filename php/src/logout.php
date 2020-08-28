@@ -8,4 +8,4 @@ $smarty->assign("pagetitle", "Logout");
 $smarty->assign("template", "logout.tpl");
 $smarty->assign("help", help("logout"));
 $smarty->display("main.tpl");
-?>
+

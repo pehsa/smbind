@@ -13,4 +13,4 @@ else {
 	// The user is not an administrator.
 	notadmin($smarty);
 }
-?>
+

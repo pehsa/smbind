@@ -39,4 +39,4 @@ $_CONF['ssh_activity_timeout'] = 10;
 $_CONF['namedcheckconf'] = "/usr/sbin/named-checkconf";
 $_CONF['namedcheckzone'] = "/usr/sbin/named-checkzone";
 $_CONF['rndc'] 	  	 = "/usr/sbin/rndc";
-?>
+

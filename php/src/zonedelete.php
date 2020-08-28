@@ -37,4 +37,4 @@ else {
 	notadmin($smarty);
 }
 
-?>
+

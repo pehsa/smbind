@@ -72,9 +72,8 @@ function fileinfo($file) {
 			"The group <b>$group</b> has the following members: $members.<br>" .
 			"Any other account has <b>$otherperm</b> permissions to $file.<br>";
 	}
-	else {
-		return "File does not exist: $file<br>";
-	}
+
+    return "File does not exist: $file<br>";
 }
 
 print "Testing config.php...";

@@ -42,4 +42,4 @@ if (isset($_GET['zone_search'])) {
 $smarty->assign("page_root", $page_root);
 $smarty->display("main.tpl");
 
-?>
+

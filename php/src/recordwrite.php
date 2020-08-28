@@ -52,7 +52,7 @@ if((filter("num", $_GET['i'])) &&
 							$_POST['num2'][$x],
 							$_POST['num3'][$x],
 							$destination,
-							$_POST['type'][$x] == 'TXT' ? $_POST['txt'][$x] : null,
+							$_POST['type'][$x] === 'TXT' ? $_POST['txt'][$x] : null,
 							$_POST['host_id'][$x], $_GET['i']
 						)
 					   );
@@ -79,8 +79,8 @@ if((filter("num", $_GET['i'])) &&
 			array($_POST['zoneid'], $_POST['newhost'],
 				 strlen($_POST['newttl'] > 0) ? $_POST['newttl'] : null,
 				 $_POST['newtype'],
-				 $_POST['newtype'] == 'TXT' ? '' : preg_replace("/\.$/", "", $_POST['newdestination']),
-				 $_POST['newtype'] == 'TXT' ? $_POST['newdestination'] : null)
+				 $_POST['newtype'] === 'TXT' ? '' : preg_replace("/\.$/", "", $_POST['newdestination']),
+				 $_POST['newtype'] === 'TXT' ? $_POST['newdestination'] : null)
 			);
 		is_error($res);
 	
@@ -130,14 +130,12 @@ if((filter("num", $_GET['i'])) &&
 			);
 	is_error($res);
 	
-	if (is_admin()) {
-		if(isset($_POST['owner'])) {
-			$res = $dbconnect->query("UPDATE zones set owner = ? where id = ?",
-				array($_POST['owner'], $_GET['i'])
-			);
-			is_error($res);
-		}
-	}
+	if (is_admin() && isset($_POST['owner'])) {
+        $res = $dbconnect->query("UPDATE zones set owner = ? where id = ?",
+            array($_POST['owner'], $_GET['i'])
+        );
+        is_error($res);
+    }
 }
 
-?>
+

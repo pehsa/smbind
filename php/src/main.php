@@ -24,4 +24,4 @@ $smarty->assign("template", "mainpage.tpl");
 $smarty->assign("help", help("mainpage"));
 $smarty->assign("menu_button", menu_buttons());
 $smarty->display("main.tpl");
-?>
+

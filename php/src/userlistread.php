@@ -22,4 +22,4 @@ else {
 	notadmin($smarty);
 }
 
-?>
+

@@ -6,4 +6,4 @@ $smarty->assign("template", "chpass.tpl");
 $smarty->assign("help", help("chpass"));
 $smarty->assign("menu_button", menu_buttons());
 $smarty->display("main.tpl");
-?>
+

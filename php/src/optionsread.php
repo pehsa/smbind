@@ -7,7 +7,7 @@ if(is_admin()) {
 			     "WHERE preftype = 'record'" .
 			     "ORDER by prefkey"
 		   );
-	for($x = 0, $y = 0, $i = 0; $i < count($records); $y++, $i++) {
+	for($x = 0, $y = 0, $i = 0, $iMax = count($records); $i < $iMax; $y++, $i++) {
 		if($y == 4) {
 			$x++;
 			$y = 0;
@@ -34,4 +34,4 @@ else {
 	notadmin($smarty);
 }
 
-?>
+

@@ -37,25 +37,25 @@ while($zone = $zoneres->fetchrow(DB_FETCHMODE_ASSOC)) {
 	fclose($fd);
 
 	while($record = $recordres->fetchrow(DB_FETCHMODE_ASSOC)) {
-		if($record['type'] == "MX" || $record['type'] == "SRV") {
+		if($record['type'] === "MX" || $record['type'] === "SRV") {
 			$pri = $record['pri'];
 		}
 		else {
 			$pri = "";
 		}
-		if ($record['type'] == 'SRV') {
+		if ($record['type'] === 'SRV') {
 			$pri .= ' '.$record['num1'].' '.$record['num2'].' ';
 		}
 		if(
-			($record['type'] == "NS" ||
-			 $record['type'] == "PTR" ||
-			 $record['type'] == "CNAME" ||
-			 $record['type'] == "MX" ||
-			 $record['type'] == "SRV") &&
-			($record['destination'] != "@")) 	{
+			($record['type'] === "NS" ||
+			 $record['type'] === "PTR" ||
+			 $record['type'] === "CNAME" ||
+			 $record['type'] === "MX" ||
+			 $record['type'] === "SRV") &&
+			($record['destination'] !== "@")) 	{
 			$destination = $record['destination'] . ".";
 		}
-		elseif($record['type'] == "TXT") {
+		elseif($record['type'] === "TXT") {
 			$txt = preg_replace('/\\\/', '\\\\\\\\', $record['txt']);
 			$txt = preg_replace('/"/', '\\"', $txt);
 			$txt = implode("\"\n\t\t\t\t\t\"", str_split($txt, 255));
@@ -192,58 +192,62 @@ function delete_zone_files_from_slave($slave, $zones, &$slave_output) {
 		$error = false;
 		while (1) {
 			$read = array();
-			if (!$stdout_eof) $read['stdout'] = $pipes[1];
-			if (!$stderr_eof) $read['stderr'] = $pipes[2];
+			if (!$stdout_eof) {
+				$read['stdout'] = $pipes[1];
+			}
+			if (!$stderr_eof) {
+				$read['stderr'] = $pipes[2];
+			}
 			$write = $stdin_eof ? null : array($pipes[0]);
 			$expect = null;
 			if (false === ($num_changed_streams = stream_select($read, $write, $except, 2))) {
 				$error = true;
 				break;
-			} else {
-				if (isset($read['stdout'])) {
-					$buf = stream_get_contents($read['stdout']);
-					if ($buf === false) {
-						$stdout_eof = true;
-						$error = true;
-					} elseif ($buf === '') {
-						$stdout_eof = true;
-						fclose($read['stdout']);
-					} else {
-						$last_actvity = time();
-						$stdout .= $buf;
-					}
+			}
+
+			if (isset($read['stdout'])) {
+				$buf = stream_get_contents($read['stdout']);
+				if ($buf === false) {
+					$stdout_eof = true;
+					$error = true;
+				} elseif ($buf === '') {
+					$stdout_eof = true;
+					fclose($read['stdout']);
+				} else {
+					$last_actvity = time();
+					$stdout .= $buf;
 				}
-				if (isset($read['stderr'])) {
-					$buf = stream_get_contents($read['stderr']);
-					if ($buf === false) {
-						$stderr_eof = true;
-						$error = true;
-					} elseif ($buf === '') {
-						$stderr_eof = true;
-						fclose($read['stderr']);
-					} else {
-						$last_actvity = time();
-						$stderr .= $buf;
-					}
+			}
+			if (isset($read['stderr'])) {
+				$buf = stream_get_contents($read['stderr']);
+				if ($buf === false) {
+					$stderr_eof = true;
+					$error = true;
+				} elseif ($buf === '') {
+					$stderr_eof = true;
+					fclose($read['stderr']);
+				} else {
+					$last_actvity = time();
+					$stderr .= $buf;
 				}
-				if (isset($write[0])) {
-					$zone = array_shift($zones);
-					if ($zone === null) {
-						fclose($write[0]);
+			}
+			if (isset($write[0])) {
+				$zone = array_shift($zones);
+				if ($zone === null) {
+					fclose($write[0]);
+					$stdin_eof = true;
+				} else {
+					$wrtstr = $_CONF['path'] . preg_replace('/\//','-',$zone[0]) . "\0";
+					$wrlen = strlen($wrtstr);
+					$written = fwrite($write[0], $wrtstr);
+					if ($written === false) {
 						$stdin_eof = true;
+						$error = true;
+					} elseif ($written !== $wrlen) {
+						$stdin_eof = true;
+						$error = true;
 					} else {
-						$wrtstr = $_CONF['path'] . preg_replace('/\//','-',$zone[0]) . "\0";
-						$wrlen = strlen($wrtstr);
-						$written = fwrite($write[0], $wrtstr);
-						if ($written === false) {
-							$stdin_eof = true;
-							$error = true;
-						} elseif ($written !== $wrlen) {
-							$stdin_eof = true;
-							$error = true;
-						} else {
-							$last_actvity = time();
-						}
+						$last_actvity = time();
 					}
 				}
 			}
@@ -252,7 +256,9 @@ function delete_zone_files_from_slave($slave, $zones, &$slave_output) {
 			}
 			if ((time() - $last_actvity) > $timeout) {
 				foreach($pipes as &$pipe) {
-					if (is_resource($pipe)) fclose($pipe);
+					if (is_resource($pipe)) {
+						fclose($pipe);
+					}
 				}
 				proc_terminate($process);
 				break;
@@ -260,18 +266,17 @@ function delete_zone_files_from_slave($slave, $zones, &$slave_output) {
 		} //while
 
 		// if ($error) {
-			foreach($pipes as &$pipe) {
-				if (is_resource($pipe)) fclose($pipe);
+			foreach($pipes as $pipe) {
+				if (is_resource($pipe)) {
+					fclose($pipe);
+				}
 			}
 		// }
 
 		$return_value = proc_close($process);
 		$slave_output = array($return_value, $stdout, $stderr);
-		if ($return_value || $error) {
-			return false;
-		} else {
-			return true;
-		}
+
+		return !($return_value || $error);
 	} else {
 		return false;
 	}
@@ -310,4 +315,4 @@ $smarty->assign("template", "commit.tpl");
 $smarty->assign("help", help("commit"));
 $smarty->assign("menu_button", menu_buttons());
 $smarty->display("main.tpl");
-?>
+
